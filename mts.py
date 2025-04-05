@@ -22,7 +22,9 @@ def send_get_request(path):
     # Check whether there was an error sent from the server.
     # 200 is the HTTP Success status code, so we do not expect any
     # other response code.
+    print(path)
     if response.status_code != 200:
+        print(response.status_code)
         return (
             False,
             f"Error - something went wrong when requesting [CODE: {response.status_code}]: {response.text}",
@@ -61,8 +63,6 @@ def get_context():
     Returns:
         (success?, error or message)
     """
-
-
 
     return send_get_request("/request")
 
