@@ -40,7 +40,11 @@ def get_cars(scraping_run_id: str):
 
     url = f"https://api.scrapemequickly.com/cars/test?scraping_run_id={scraping_run_id}&per_page=10&start=0"
     headers = {
-    "Authorization": f"Bearer {token}"
+    "Authorization": f"Bearer {token}",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Connection": "keep-alive"
     }
     response = requests.get(url, headers=headers, proxies=proxies)
 
