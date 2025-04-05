@@ -1,8 +1,12 @@
 import requests
+
 import sys
 import json
 from bs4 import BeautifulSoup
 from statistics import mean, mode
+import concurrent.futures
+import random
+
 
 def create_team(team_name: str, team_email: str) -> str:
     r = requests.post(
@@ -48,23 +52,35 @@ def get_cars(scraping_run_id: str, start: int):
         "https": "http://pingproxies:scrapemequickly@194.87.135.1:9875"
     }
 
-    url = f"https://api.scrapemequickly.com/cars/test?scraping_run_id={scraping_run_id}&per_page=25&start={start}"
-    headers = {
-    "Authorization": f"Bearer {token}",
-    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36",
-    }
-    response = requests.get(url, headers=headers, proxies=proxy)
 
-    content = response.json()
+    urls = [f"https://api.scrapemequickly.com/cars/test?scraping_run_id={scraping_run_id}&per_page=25&start={start + 25*i}" for i in range(10)]
 
-    for car in content["data"]:
-        years.append(car["year"])
-        prices.append(car["price"])
-        makes.append(car["make"])
+
+    def get_car(url):
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36",
+        }
+        response = requests.get(url, headers=headers, proxies={"https": random.choice(proxies)})
+
+        contents = response.json()
+        if response.status_code != 200:
+            print(contents)
+        # print(contents)
+
+        for car in contents["data"]:
+            years.append(car["year"])
+            prices.append(car["price"])
+            makes.append(car["make"])
+        
+
+
     
-
-
-
+    #url = f"https://api.scrapemequickly.com/cars/test?scraping_run_id={scraping_run_id}&per_page=25&start={start}"
+    
+    
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+        executor.map(get_car, urls)
 
 
 def submit(answers: dict, scraping_run_id: str) -> bool:
@@ -90,9 +106,9 @@ makes = []
 start = 0
 session = requests.Session()
 
-for i in range(1000):
+for i in range(100):
     get_cars(scraping_run_id, start)
-    start += 25
+    start += 250
     print(i)
 
 
@@ -101,6 +117,9 @@ print(min(years))
 print(max(years))
 print(mean(prices))
 print(mode(makes))
+
+print(len(years))
+print(len(prices))
 
 answers = {
     "min_year": min(years),
