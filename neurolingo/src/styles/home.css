@@ -1,0 +1,43 @@
+body {
+    background: #7479c4; 
+}
+
+.app {
+
+}
+
+h1 {
+    color: white;
+}
+
+.app-header {
+    display: flex;
+    justify-content: center;
+    margin:auto;
+}
+
+.app-body {
+    margin:auto;
+}
+
+.mic {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.avatar {
+    display: flex;
+    justify-content: center;
+}
+
+.mic-image {
+    width: 60px;
+    height: 75px;
+}
+
+#avatar {
+    margin-top: 5%;
+    width: 30%;
+    height: 30%;
+}

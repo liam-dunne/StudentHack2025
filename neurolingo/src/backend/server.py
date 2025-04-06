@@ -1,3 +1,6 @@
+from flask import Flask
+from flask_socketio import SocketIO
+from flask_cors import CORS
 import os
 import asyncio
 
@@ -5,29 +8,38 @@ import asyncio
 from pyneuphonic import Neuphonic, Agent, AgentConfig  # noqa: F401
 from pyneuphonic.models import APIResponse, AgentResponse
 
-def translate():
-    speaker = 0
-    def on_message(message: APIResponse[AgentResponse]):
+
+app = Flask(__name__)
+CORS(app)
+socketio = SocketIO(app)
+
+def on_message(message: APIResponse[AgentResponse]):
         global speaker
-        except KeyboardInterrupt:
-
         if(message.data.type == 'llm_response') or (message.data.type == 'audio_response'):
+            print("HE")
             speaker = 0
-            #socketio.emit("update", {"talking": False})
+            socketio.emit("update", {"talking": False})
         else:
+            print("YA")
             speaker = 1
-            #socketio.emit("update", {"talking": True})
+            socketio.emit("update", {"talking": True})
 
+
+@app.route("/api/translate", methods=["POST"])
+def translate():
+    global speaker
+    speaker = 0
+    socketio.emit("update", {"talking": False})
+    
     print("Select an option:")
     print("1 - Translate English spoken words to Spanish")
     print("2 - Translate English spoken words to German")
 
     lang = int(input(""))
 
-    
     async def main():
         client = Neuphonic(api_key="50d15a31056af1cf8e4a4ecf050896dbe60b5ad43147e6ddebf9ef6c7219b3b4.da8db507-e24d-4a7a-82cc-35414f5a5c50")
-
+        
         if lang == 1:
             agent_id = client.agents.create(
                 name='Alejandra',
@@ -58,8 +70,6 @@ def translate():
                 on_message = on_message,
             )
 
-            
-
         try:
             await agent.start()
 
@@ -70,4 +80,7 @@ def translate():
         except KeyboardInterrupt:
             await agent.stop()
 
+
     asyncio.run(main())
+
+app.run(debug=True)
