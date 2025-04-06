@@ -6,10 +6,13 @@ from pyneuphonic import Neuphonic, Agent, AgentConfig  # noqa: F401
 from pyneuphonic.models import APIResponse, AgentResponse
 
 speaker = 0
+text = ""
 def on_message(message: APIResponse[AgentResponse]):
-    global speaker
+    global speaker, text
     if(message.data.type == 'llm_response') or (message.data.type == 'audio_response'):
         speaker = 0
+        if message.data.text != None:
+            text = message.data.text
     else:
         speaker = 1
 
@@ -59,7 +62,7 @@ async def main():
 
         while True:
             await asyncio.sleep(0.3)
-            print("Speaker = " + str(speaker))
+            print("Text = " + text)
 
     except KeyboardInterrupt:
         await agent.stop()
