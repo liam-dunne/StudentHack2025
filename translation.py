@@ -5,11 +5,17 @@ import asyncio
 from pyneuphonic import Neuphonic, Agent, AgentConfig  # noqa: F401
 from pyneuphonic.models import APIResponse, AgentResponse
 
+speaker = 0
+def on_message(message: APIResponse[AgentResponse]):
+    global speaker
+    if(message.data.type == 'llm_response') or (message.data.type == 'audio_response'):
+        speaker = 0
+    else:
+        speaker = 1
 
 print("Select an option:")
 print("1 - Translate English spoken words to Spanish")
 print("2 - Translate English spoken words to German")
-print("3 - Translate English spoken words to Spanish")
 
 lang = int(input(""))
 
@@ -28,20 +34,22 @@ async def main():
             agent_id=agent_id,
             lang_code='es',
             voice_id='3c8d7261-b917-4085-90ad-e7de015b3030',
+            on_message = on_message,
         )
 
-    elif opt == 2:
+    elif lang == 2:
         agent_id = client.agents.create(
             name='Klaus',
             prompt='You are a translator. We will speak to you in English and repeat back a German sentence of the same meaning. You must not say a single word that is not a direct translation of something we have said to you.',
             greeting='',
         ).data['agent_id']
 
-        opt = Agent(
+        agent = Agent(
             client,
             agent_id=agent_id,
             lang_code='de',
             voice_id='052c4c9e-c8c3-42f8-966e-e041979fd056',
+            on_message = on_message,
         )
 
         
@@ -50,7 +58,8 @@ async def main():
         await agent.start()
 
         while True:
-            await asyncio.sleep(1)
+            await asyncio.sleep(0.3)
+            print("Speaker = " + str(speaker))
 
     except KeyboardInterrupt:
         await agent.stop()
